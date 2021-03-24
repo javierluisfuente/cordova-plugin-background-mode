@@ -22,10 +22,13 @@
 package de.appplant.cordova.plugin.background;
 
 import android.app.Activity;
+import android.app.ActivityManager;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.IBinder;
+import android.view.View;
+import android.view.ViewTreeObserver;
 
 import org.apache.cordova.CallbackContext;
 import org.apache.cordova.CordovaPlugin;
@@ -170,9 +173,23 @@ public class BackgroundMode extends CordovaPlugin {
     {
         isDisabled = false;
 
-        if (inBackground) {
-            startService();
-        }
+        View view = webView.getEngine().getView();
+        view.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+            @Override
+            public void onGlobalLayout() {
+                //At this point the layout is complete and the
+                //dimensions of myView and any child views are known.
+                //Log.d("BackgroundMode","Estamos dentro de onGlobalLayout Listener");
+                ActivityManager.RunningAppProcessInfo myProcess = new ActivityManager.RunningAppProcessInfo();
+                ActivityManager.getMyMemoryState(myProcess);
+                inBackground = myProcess.importance != ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND;
+                //Log.d("BackgroundMode","Entrando en la función enableMode, inBackground: " + inBackground);
+                if (inBackground) {
+                    startService();
+                }
+
+            }
+        });
     }
 
     /**
