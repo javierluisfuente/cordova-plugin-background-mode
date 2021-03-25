@@ -334,7 +334,15 @@ public class BackgroundModeExt extends CordovaPlugin {
         addSreenAndKeyguardFlags();
         Log.d("BackgroundMode","unlock - getApp(): " + getApp());
         Log.d("BackgroundMode","unlock - getLaunchIntent(): " + getLaunchIntent());
-        getApp().startActivity(getLaunchIntent());
+
+        new android.os.Handler().postDelayed(
+            new Runnable() {
+                public void run() {
+                    Log.d("BackgroundMode","Estamos dentro de unlock- postDelayed");
+                    getApp().startActivity(getLaunchIntent());
+                }
+            }, 1000);
+        //getApp().startActivity(getLaunchIntent());
     }
 
     /**
