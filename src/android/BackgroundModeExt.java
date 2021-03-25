@@ -34,6 +34,7 @@ import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.PowerManager;
+import android.util.Log;
 import android.view.View;
 
 import org.apache.cordova.CallbackContext;
@@ -136,7 +137,7 @@ public class BackgroundModeExt extends CordovaPlugin {
         Intent intent = new Intent(Intent.ACTION_MAIN);
 
         intent.addCategory(Intent.CATEGORY_HOME);
-
+        Log.d("BackgroundMode","Estamos dentro de moveToBackground: " + intent);
         getApp().startActivity(intent);
     }
 
@@ -154,6 +155,7 @@ public class BackgroundModeExt extends CordovaPlugin {
                 Intent.FLAG_ACTIVITY_CLEAR_TOP);
 
         clearScreenAndKeyguardFlags();
+        Log.d("BackgroundMode","Estamos dentro de moveToForeground: " + intent);
         app.startActivity(intent);
     }
 
@@ -219,7 +221,7 @@ public class BackgroundModeExt extends CordovaPlugin {
     {
         Activity activity = cordova.getActivity();
         PackageManager pm = activity.getPackageManager();
-
+        Log.d("BackgroundMode","Estamos dentro de openAppStart - activity: " + activity);
         for (Intent intent : getAppStartIntents())
         {
             if (pm.resolveActivity(intent, MATCH_DEFAULT_ONLY) != null)
@@ -230,12 +232,13 @@ public class BackgroundModeExt extends CordovaPlugin {
 
                 if (arg instanceof Boolean && !((Boolean) arg))
                 {
+                    Log.d("BackgroundMode","Estamos dentro de openAppStart - startActivity: " + intent);
                     activity.startActivity(intent);
                     break;
                 }
 
                 AlertDialog.Builder dialog = new AlertDialog.Builder(activity, Theme_DeviceDefault_Light_Dialog);
-
+                Log.d("BackgroundMode","Estamos dentro de openAppStart - startActivity 2: " + intent);
                 dialog.setPositiveButton(ok, (o, d) -> activity.startActivity(intent));
                 dialog.setNegativeButton(cancel, (o, d) -> {});
                 dialog.setCancelable(true);
@@ -327,7 +330,10 @@ public class BackgroundModeExt extends CordovaPlugin {
      */
     private void unlock()
     {
+        Log.d("BackgroundMode","Estamos dentro de unlock");
         addSreenAndKeyguardFlags();
+        Log.d("BackgroundMode","unlock - getApp(): " + getApp());
+        Log.d("BackgroundMode","unlock - getLaunchIntent(): " + getLaunchIntent());
         getApp().startActivity(getLaunchIntent());
     }
 

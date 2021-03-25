@@ -27,6 +27,7 @@ import android.content.ComponentName;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.IBinder;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewTreeObserver;
 
@@ -95,7 +96,7 @@ public class BackgroundMode extends CordovaPlugin {
                             CallbackContext callback)
     {
         boolean validAction = true;
-
+        Log.d("BackgroundMode","Estamos dentro de execute - action: " + action);
         switch (action)
         {
             case "configure":
@@ -128,6 +129,7 @@ public class BackgroundMode extends CordovaPlugin {
     @Override
     public void onPause(boolean multitasking)
     {
+        Log.d("BackgroundMode","Estamos dentro de onPause - inBackground: " + inBackground);
         try {
             inBackground = true;
             startService();
@@ -141,6 +143,7 @@ public class BackgroundMode extends CordovaPlugin {
      */
     @Override
     public void onStop () {
+        Log.d("BackgroundMode","Estamos dentro de onStop");
         clearKeyguardFlags(cordova.getActivity());
     }
 
@@ -152,6 +155,7 @@ public class BackgroundMode extends CordovaPlugin {
     @Override
     public void onResume (boolean multitasking)
     {
+        Log.d("BackgroundMode","Estamos dentro de onStop - inBackground: " + inBackground);
         inBackground = false;
         stopService();
     }
@@ -179,11 +183,11 @@ public class BackgroundMode extends CordovaPlugin {
             public void onGlobalLayout() {
                 //At this point the layout is complete and the
                 //dimensions of myView and any child views are known.
-                //Log.d("BackgroundMode","Estamos dentro de onGlobalLayout Listener");
+                Log.d("BackgroundMode","Estamos dentro de onGlobalLayout Listener");
                 ActivityManager.RunningAppProcessInfo myProcess = new ActivityManager.RunningAppProcessInfo();
                 ActivityManager.getMyMemoryState(myProcess);
                 inBackground = myProcess.importance != ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND;
-                //Log.d("BackgroundMode","Entrando en la función enableMode, inBackground: " + inBackground);
+                Log.d("BackgroundMode","Entrando en la función enableMode, inBackground: " + inBackground);
                 if (inBackground) {
                     startService();
                 }
@@ -252,7 +256,7 @@ public class BackgroundMode extends CordovaPlugin {
     private void startService()
     {
         Activity context = cordova.getActivity();
-
+        Log.d("BackgroundMode","Estamos dentro de startService- context: " + context);
         if (isDisabled || isBind)
             return;
 
@@ -277,7 +281,7 @@ public class BackgroundMode extends CordovaPlugin {
     {
         Activity context = cordova.getActivity();
         Intent intent    = new Intent(context, ForegroundService.class);
-
+        Log.d("BackgroundMode","Estamos dentro de stopService- context: " + context);
         if (!isBind) return;
 
         fireEvent(Event.DEACTIVATE, null);
@@ -297,7 +301,7 @@ public class BackgroundMode extends CordovaPlugin {
     {
         String eventName = event.name().toLowerCase();
         Boolean active   = event == Event.ACTIVATE;
-
+        Log.d("BackgroundMode","Estamos dentro de fireEvent - event: " + event);
         String str = String.format("%s._setActive(%b)",
                 JS_NAMESPACE, active);
 
