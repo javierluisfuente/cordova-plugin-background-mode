@@ -1,5 +1,8 @@
 ## ChangeLog
 
+#### Version 0.7.3-dev.2 (11.03.2025)
+- Fixed app crash on android SDK >= 34. Foreground service types and other requirements are now mandatory.
+
 #### Version 0.7.3-dev.1 (02.08.2024)
 - Fixed app crash on android SDK >= 31, it need the PendingIntent.FLAG_IMMUTABLE.
 

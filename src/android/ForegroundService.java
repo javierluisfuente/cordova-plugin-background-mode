@@ -35,6 +35,9 @@ import android.os.Build;
 import android.os.IBinder;
 import android.os.PowerManager;
 import android.app.NotificationChannel;
+import android.content.pm.ServiceInfo;
+import android.content.pm.PackageManager;
+import android.app.ActivityManager;
 
 import org.json.JSONObject;
 
@@ -128,8 +131,18 @@ public class ForegroundService extends Service {
         JSONObject settings = BackgroundMode.getSettings();
         boolean isSilent    = settings.optBoolean("silent", false);
 
+        if (!hasRequiredPermissions(this) || !isAppEligibleForFGS(this)) {
+            return; // App is not eligible for FGS
+        } 
+
         if (!isSilent) {
-            startForeground(NOTIFICATION_ID, makeNotification());
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) { // API 34
+                startForeground(NOTIFICATION_ID, makeNotification(), ServiceInfo.FOREGROUND_SERVICE_TYPE_LOCATION);
+                // Foreground service started with location type
+            } else {
+                startForeground(NOTIFICATION_ID, makeNotification());
+                // Foreground service started
+            }
         }
 
         PowerManager pm = (PowerManager)getSystemService(POWER_SERVICE);
@@ -320,5 +333,35 @@ public class ForegroundService extends Service {
     private NotificationManager getNotificationManager()
     {
         return (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+    }
+
+    public static boolean hasRequiredPermissions(Context context) {
+        return context.checkSelfPermission(android.Manifest.permission.FOREGROUND_SERVICE_LOCATION) == PackageManager.PERMISSION_GRANTED
+            && (context.checkSelfPermission(android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
+            || context.checkSelfPermission(android.Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED);
+    }
+
+    public boolean isAppEligibleForFGS(Context context) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+            return true; // No restrictions on versions prior to Android 14
+        }
+
+        ActivityManager activityManager = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
+        if (activityManager != null) {
+            for (ActivityManager.AppTask task : activityManager.getAppTasks()) {
+                if (task.getTaskInfo().topActivity != null && task.getTaskInfo().topActivity.getPackageName().equals(context.getPackageName())) {
+                    return true; // App is in the foreground
+                }
+            }
+        }
+
+        PowerManager powerManager = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
+        boolean isIgnoringBatteryOptimizations = powerManager.isIgnoringBatteryOptimizations(context.getPackageName());
+
+        if (isIgnoringBatteryOptimizations) {
+            return true; // App is exempt from battery optimizations
+        }
+
+        return false; // App is not eligible for FGS
     }
 }
