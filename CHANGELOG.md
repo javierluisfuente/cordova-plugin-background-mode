@@ -1,4 +1,6 @@
 ## ChangeLog
+#### Version 0.7.3-dev.3 (26.03.2025)
+- The startForeground function is now wrapped in a try-catch block to prevent the app from crashing.
 
 #### Version 0.7.3-dev.2 (11.03.2025)
 - Fixed app crash on android SDK >= 34. Foreground service types and other requirements are now mandatory.

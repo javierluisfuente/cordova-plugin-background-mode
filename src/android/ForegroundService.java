@@ -136,12 +136,16 @@ public class ForegroundService extends Service {
         } 
 
         if (!isSilent) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) { // API 34
-                startForeground(NOTIFICATION_ID, makeNotification(), ServiceInfo.FOREGROUND_SERVICE_TYPE_LOCATION);
-                // Foreground service started with location type
-            } else {
-                startForeground(NOTIFICATION_ID, makeNotification());
-                // Foreground service started
+            try {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) { // API 34
+                    startForeground(NOTIFICATION_ID, makeNotification(), ServiceInfo.FOREGROUND_SERVICE_TYPE_LOCATION);
+                    // Foreground service started with location type
+                } else {
+                    startForeground(NOTIFICATION_ID, makeNotification());
+                    // Foreground service started
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
             }
         }
 
